@@ -85,6 +85,8 @@ export default function Header() {
                       alt="DocPhone logo"
                       width={34}
                       height={34}
+                      loading="eager"
+                      priority
                       style={{ width: 'auto', height: 'auto' }}
                       className="object-contain"
                     />
