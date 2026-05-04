@@ -3,9 +3,9 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import {
-  Upload, Mic, Cpu, FileCheck, ChevronRight, ChevronLeft,
+  Mic, FileCheck, ChevronRight, ChevronLeft,
   Image as ImageIcon, FileText, Sparkles, CheckCircle,
-  Loader2, Volume2, Edit3, Download, Brain, AlertCircle, XCircle, Activity
+  Loader2, Edit3, Download, Brain, XCircle, Activity
 } from 'lucide-react';
 
 const SAMPLE_XRAY = '/images/demo/xray-sample-1.jpg';
@@ -20,15 +20,14 @@ const steps = [
 export default function WizardFlow() {
   const [step, setStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [reportId, setReportId] = useState('');
+  const [reportId] = useState(() => 
+    `INF-${Date.now().toString(36).toUpperCase()}-${Math.floor(Math.random() * 9999).toString().padStart(4, '0')}`
+  );
 
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isImageLoading, setIsImageLoading] = useState(false);
-  const [aiFindings, setAiFindings] = useState('');
-  const [showFindings, setShowFindings] = useState(false);
 
   const [isRecording, setIsRecording] = useState(false);
-  const [recordingProgress, setRecordingProgress] = useState(0);
   const [dictatedText, setDictatedText] = useState('');
 
 
@@ -36,21 +35,21 @@ export default function WizardFlow() {
   const [finalReport, setFinalReport] = useState({ hallazgos: '', impresion: '', recomendaciones: '' });
 
   const recordingInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+  const hasLoadedImage = useRef(false);
 
+  // Cargar imagen inicial solo una vez
   useEffect(() => {
-    setReportId(`INF-${Date.now().toString(36).toUpperCase()}-${Math.floor(Math.random() * 9999).toString().padStart(4, '0')}`);
-  }, []);
-
-  useEffect(() => {
-    if (selectedImage === null && !isImageLoading) {
-      setIsImageLoading(true);
-      const t = setTimeout(() => {
+    if (!hasLoadedImage.current) {
+      hasLoadedImage.current = true;
+      const timer = setTimeout(() => {
         setSelectedImage(SAMPLE_XRAY);
         setIsImageLoading(false);
       }, 1600);
-      return () => clearTimeout(t);
+      return () => clearTimeout(timer);
     }
   }, []);
+
+
 
   const handleNext = () => {
     if (step === 3) {
@@ -67,8 +66,7 @@ export default function WizardFlow() {
   const startProcessing = () => {
     setIsProcessing(true);
     setTimeout(() => {
-      setAiFindings('Opacidad en lóbulo inferior derecho • Bordes espiculados sugestivos de neoplasia • Leve derrame pleural • Sin compromiso mediastinal • Densidad heterogénea perihiliar');
-      setShowFindings(true);
+      // aiFindings se calculaba pero no se usaba - omitido
     }, 2200);
     setTimeout(() => {
       setFinalReport({
@@ -81,23 +79,10 @@ export default function WizardFlow() {
     }, 5200);
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        setSelectedImage(ev.target?.result as string);
-        setShowFindings(false);
-        setAiFindings('');
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+
 
   const resetImage = () => {
     setSelectedImage(null);
-    setShowFindings(false);
-    setAiFindings('');
     setIsImageLoading(true);
     setTimeout(() => {
       setSelectedImage(SAMPLE_XRAY);
@@ -109,19 +94,15 @@ export default function WizardFlow() {
     if (isRecording) {
       if (recordingInterval.current) clearInterval(recordingInterval.current);
       setIsRecording(false);
-      setRecordingProgress(0);
       return;
     }
     setIsRecording(true);
-    setRecordingProgress(0);
     let p = 0;
     recordingInterval.current = setInterval(() => {
       p += 2.2;
-      setRecordingProgress(Math.min(p, 100));
       if (p >= 100) {
         if (recordingInterval.current) clearInterval(recordingInterval.current);
         setIsRecording(false);
-        setRecordingProgress(0);
         setDictatedText(
           'Paciente presenta opacidad en lóbulo inferior derecho de bordes espiculados. Se observa leve derrame pleural asociado. No se evidencian adenopatías mediastinales. El resto del parénquima pulmonar presenta expansibilidad conservada. Sugiero realizar TAC de tórax contrastado para mejor caracterización de la lesión y descartar compromiso extrapulmonar.'
         );
@@ -428,8 +409,6 @@ export default function WizardFlow() {
                   setStep(1);
                   setSelectedImage(null);
                   setDictatedText('');
-                  setAiFindings('');
-                  setShowFindings(false);
                   setFinalReport({ hallazgos: '', impresion: '', recomendaciones: '' });
                   setIsEditingReport(false);
                   setIsImageLoading(true);
