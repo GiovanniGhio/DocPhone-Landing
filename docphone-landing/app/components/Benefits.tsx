@@ -34,7 +34,7 @@ const stats = [
     icon: FileCheck,
     value: '98.5%',
     label: 'Precisión clínica',
-    detail: 'Validado por radiólogos',
+    detail: 'Realizando pruebas',
     accent: '#0284c7',
     bg: 'rgba(2,132,199,0.06)',
     border: 'rgba(2,132,199,0.14)',
@@ -159,7 +159,7 @@ export default function Benefits() {
         >
           <div>
             <p className="font-semibold text-gray-800 text-sm md:text-base">
-              Implementación en menos de 48 horas
+              Implementación rapida
             </p>
             <p className="text-xs md:text-sm text-gray-500 mt-0.5">
               Soporte prioritario · Sin costos ocultos · Capacitación incluida

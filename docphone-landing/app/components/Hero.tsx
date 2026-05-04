@@ -77,9 +77,7 @@ export default function Hero() {
             className="text-lg md:text-2xl text-slate-600 max-w-2xl mb-10 leading-relaxed"
           >
             Optimice su práctica médica con reportes precisos generados por voz. 
-            <span className="text-blue-700 font-semibold block mt-2">
-              Tecnología diseñada para radiólogos.
-            </span>
+           
           </motion.p>
 
           <motion.div className="flex flex-col sm:flex-row gap-4">
